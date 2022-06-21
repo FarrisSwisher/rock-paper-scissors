@@ -1,101 +1,169 @@
-// Play Rock, Paper, Scissors with the console!
+// Play Rock, Paper, Scissors
 
+// Global variables
+let userScore = 0;
+let pcScore = 0;
 
+// Game Container
+const game = document.querySelector('#game');
+
+// Scores Container
+const scores = document.createElement('div');
+scores.classList.add('scores');
+
+const uScoreElem = document.createElement('h2');
+uScoreElem.classList.add('uScore');
+
+const pcScoreElem = document.createElement('h2');
+pcScoreElem.classList.add('pcScore');
+
+scores.append(uScoreElem, pcScoreElem);
+
+// Choices container
+const choices = document.createElement('div');
+choices.classList.add('choices');
+
+const userChoice = document.createElement('h1');
+const pcChoice = document.createElement('h1');
+
+choices.append(userChoice, pcChoice);
+
+// Start Button
+const start = document.querySelector('.start');
+start.addEventListener('click', initializeGame);
+
+// Gameplay Buttons
+const gameButtons = document.createElement('div');
+gameButtons.classList.add('gameButtons');
+
+const rock = document.createElement('button');
+rock.classList.add('rock');
+rock.textContent = 'rock';
+
+const paper = document.createElement('button');
+paper.classList.add('paper');
+paper.textContent = 'paper';
+
+const scissors = document.createElement('button');
+scissors.classList.add('scissors');
+scissors.textContent = 'scissors';
+
+gameButtons.append(rock, paper, scissors);
+
+const buttons = gameButtons.querySelectorAll('button');
+buttons.forEach(button => button.addEventListener('click', userPlay));
+
+// Win message container
+const winnerCon = document.createElement('div');
+winnerCon.classList.add('winnerCon');
+
+const winner = document.createElement('h1');
+winner.classList.add('winner');
+
+winnerCon.append(winner);
+
+// FUNCTIONS
+
+function userPlay(e) {
+    
+    userChoice.textContent = `You chose ${this.className}!`;
+
+    switch (this.className) {
+        case "rock":
+            playRound(0);
+            break;
+        case "paper":
+            playRound(1);
+            break;
+        case "scissors":
+            playRound(2);
+    }
+}
 
 function computerPlay() {
     return Math.floor(Math.random() * 3); 
 }
 
-function getUserChoice(userInput) {
-    // 0 == Rock, 1 == Paper, 2 == Scissors, -1 == Invalid
-    const choice = userInput;
-    if (choice === 'rock') {
-        return 0;
-    } else if (choice === 'paper') {
-        return 1;
-    } else if (choice === 'scissors') {
-        return 2;
-    } else {
-        alert("Invalid input!")
-        return -1;
-    }
-}
-
-function playRound(userChoice, pcChoice) {
+function playRound(userResult) {
     // return 1 on user win,
     // 0 on tie,
     // -1 on user lose,
     // -2 on unforeseen error
-    switch(userChoice - pcChoice) {
+    const pcResult = computerPlay();
+    switch (pcResult) {
+        case 0:
+            pcChoice.textContent = "CPU chose rock!";
+            break;
+        case 1:
+            pcChoice.textContent = "CPU chose paper!";
+            break;
+        case 2:
+            pcChoice.textContent = "CPU chose scissors!";
+    }
+
+    switch(userResult - pcResult) {
         
         case -2: // rock - scissors
-            return 1;
+            userScore++;
+            uScoreElem.textContent = `Your score: ${userScore}`;
+            playGame();
             break;
         case -1: // rock - paper, paper - scissors
-            return -1;
+            pcScore++;
+            pcScoreElem.textContent = `CPU score: ${pcScore}`;
+            playGame();
             break;
         case 0: // like-like (tie)
-            return 0;
             break;
         case 1: // paper - rock, scissors - paper
-            return 1;
+            userScore++;
+            uScoreElem.textContent = `Your score: ${userScore}`;
+            playGame();
             break;
         case 2: // scissors - rock
-            return -1;
+            pcScore++;
+            pcScoreElem.textContent = `CPU score: ${pcScore}`;
+            playGame();
             break;
         default: // this shouldn't happen
-            return -2;
+            console.log("Something went wrong");
+            return;
+    }
+    return;
+}
+
+function playGame() {
+    if (userScore === 5 || pcScore === 5){
+        scores.remove();
+        choices.remove();
+        gameButtons.remove();
+        
+        if (userScore > pcScore){
+            winner.textContent = `You Win ${userScore} - ${pcScore}!`;
+            start.textContent = "Play again!";
+            game.append(winnerCon, start);
+        } else {
+            winner.textContent = `You Lose ${userScore} - ${pcScore}!`;
+            start.textContent = "Try again?";
+            game.append(winnerCon, start);
+        }
     }
 }
 
-function game(){
-    // variables
-    let userScore = 0;
-    let pcScore = 0;
-    let ties = 0;
-    let userChoice;
-    let validChoice = -1;
-    let decision;
+function initializeGame() {
+    userScore = 0;
+    pcScore = 0;
 
-    // Welcome message in console
-    console.log("Welcome to Rock, Paper, Scissors!\nYou will play 5 rounds against the computer.");
-    console.log("Remember: Rock beats scissors, paper beats rock, and scissors beats paper!\nGood Luck!");
+    uScoreElem.textContent = `Your score: ${userScore}`;
+    pcScoreElem.textContent = `CPU score: ${pcScore}`;
+    pcChoice.textContent = "";
+    userChoice.textContent = "";
 
-    // loop through 5 rounds
-    for (let i = 0; i<5; i++){
-        while(validChoice === -1){ //ask for user's choice until valid input
-            userChoice = prompt("Rock, Paper, or Scissors?").toLowerCase();
-            console.log(`You chose ${userChoice}!`);
-            userChoice = getUserChoice(userChoice);
-            validChoice = userChoice; 
-        }
-        validChoice = -1; // reset validChoice for next round
 
-        decision = playRound(userChoice, computerPlay());
-        
-        if (decision === -1){
-            console.log("Round goes to Computer!");
-            pcScore++;
-        } else if (decision === 0){
-            console.log("Round is a Tie!");
-            ties++;
-        } else if (decision === 1){
-            console.log("You win this Round!");
-            userScore++;
-        } else {
-            console.log("Something went wrong, no winner");
-        }
-
-        console.log(`End of round ${i+1}!`);
-        console.log(`Current Score:\nYou:${userScore} - Computer:${pcScore} - Ties:${ties}`);
-    }
-    
-    if (userScore > pcScore){
-        console.log("You Win!");
-    } else if (userScore < pcScore){
-        console.log("You Lose!");
-    } else {
-        console.log("It's a Draw!");
-    }
+    if (game.contains(winnerCon)){
+        game.removeChild(winnerCon);
+    } 
+    game.removeChild(start);
+    game.append(scores, gameButtons, choices);
 
 }
